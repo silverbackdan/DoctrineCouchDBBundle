@@ -5,6 +5,12 @@
     "keywords": ["persistence", "couchdb", "symfony"],
     "homepage": "http://www.doctrine-project.org",
     "license": "LGPL",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/silverbackdan/couchdb-odm"
+        }
+    ],
     "authors": [
         {"name": "Benjamin Eberlei", "email": "kontakt@beberlei.de"},
         {"name": "Lukas Kahwe Smith", "email": "smith@pooteeweet.org"}
