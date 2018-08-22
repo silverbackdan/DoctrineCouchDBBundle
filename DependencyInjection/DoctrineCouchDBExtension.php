@@ -6,7 +6,6 @@ namespace Doctrine\Bundle\CouchDBBundle\DependencyInjection;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Bridge\Doctrine\DependencyInjection\AbstractDoctrineExtension;

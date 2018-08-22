@@ -12,6 +12,12 @@
 
 namespace Doctrine\Bundle\CouchDBBundle\DependencyInjection\Compiler;
 
+use Doctrine\Bundle\CouchDBBundle\Mapping\Driver\YamlDriver;
+use Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver;
+use Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator;
+use Doctrine\ODM\CouchDB\Mapping\Driver\AnnotationDriver;
+use Doctrine\ODM\CouchDB\Mapping\Driver\PHPDriver;
+use Doctrine\ODM\CouchDB\Mapping\Driver\XmlDriver;
 use Symfony\Bridge\Doctrine\DependencyInjection\CompilerPass\RegisterMappingsPass;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -50,106 +56,106 @@ class DoctrineCouchDBMappingsPass extends RegisterMappingsPass
             'addDocumentNamespace',
             $aliasMap
         );
-
     }
 
     /**
-     * @param array    $namespaces        Hashmap of directory path to namespace
+     * @param array $mappings
      * @param string[] $managerParameters List of parameters that could which object manager name
      *                                    your bundle uses. This compiler pass will automatically
      *                                    append the parameter name for the default entity manager
      *                                    to this list.
-     * @param string   $enabledParameter  Service container parameter that must be present to
+     * @param bool $enabledParameter Service container parameter that must be present to
      *                                    enable the mapping. Set to false to not do any check,
      *                                    optional.
-     * @param string[] $aliasMap          Map of alias to namespace.
+     * @param string[] $aliasMap Map of alias to namespace.
+     * @return DoctrineCouchDBMappingsPass
      */
-    public static function createXmlMappingDriver(array $namespaces, array $managerParameters, $enabledParameter = false, array $aliasMap = array())
+    public static function createXmlMappingDriver(array $mappings, array $managerParameters, $enabledParameter = false, array $aliasMap = array())
     {
-        $arguments = array($namespaces, '.couchdb.xml');
-        $locator = new Definition('Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator', $arguments);
-        $driver = new Definition('Doctrine\ODM\CouchDB\Mapping\Driver\XmlDriver', array($locator));
-
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        $arguments = [$mappings, '.couchdb.xml'];
+        $locator = new Definition(SymfonyFileLocator::class, $arguments);
+        $driver = new Definition(XmlDriver::class, [$locator]);
+        return new DoctrineCouchDBMappingsPass($driver, $mappings, $managerParameters, $enabledParameter, $aliasMap);
     }
 
     /**
-     * @param array    $namespaces          Hashmap of directory path to namespace
+     * @param array $mappings Hashmap of directory path to namespace
      * @param string[] $managerParameters List of parameters that could which object manager name
      *                                    your bundle uses. This compiler pass will automatically
      *                                    append the parameter name for the default entity manager
      *                                    to this list.
-     * @param string   $enabledParameter  Service container parameter that must be present to
+     * @param string|boolean $enabledParameter Service container parameter that must be present to
      *                                    enable the mapping. Set to false to not do any check,
      *                                    optional.
-     * @param string[] $aliasMap          Map of alias to namespace.
+     * @param string[] $aliasMap Map of alias to namespace.
+     * @return DoctrineCouchDBMappingsPass
      */
-    public static function createYamlMappingDriver(array $namespaces, array $managerParameters, $enabledParameter = false, array $aliasMap = array())
+    public static function createYamlMappingDriver(array $mappings, array $managerParameters, $enabledParameter = false, array $aliasMap = array())
     {
-        $arguments = array($namespaces, '.couchdb.yml');
-        $locator = new Definition('Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator', $arguments);
-        $driver = new Definition('Doctrine\ODM\CouchDB\Mapping\Driver\YamlDriver', array($locator));
-
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        $arguments = [$mappings, '.couchdb.yml'];
+        $locator = new Definition(SymfonyFileLocator::class, $arguments);
+        $driver = new Definition(YamlDriver::class, [$locator]);
+        return new DoctrineCouchDBMappingsPass($driver, $mappings, $managerParameters, $enabledParameter, $aliasMap);
     }
 
     /**
-     * @param array    $namespaces        List of namespaces that are handled with annotation mapping
-     * @param array    $directories       List of directories to look for annotation mapping files
+     * @param array $mappings List of namespaces that are handled with annotation mapping
+     * @param array $directories List of directories to look for annotation mapping files
      * @param string[] $managerParameters List of parameters that could which object manager name
      *                                    your bundle uses. This compiler pass will automatically
      *                                    append the parameter name for the default entity manager
      *                                    to this list.
-     * @param string   $enabledParameter  Service container parameter that must be present to
+     * @param string|boolean $enabledParameter Service container parameter that must be present to
      *                                    enable the mapping. Set to false to not do any check,
      *                                    optional..
-     * @param string[] $aliasMap          Map of alias to namespace.
+     * @param string[] $aliasMap Map of alias to namespace.
+     * @return DoctrineCouchDBMappingsPass
      */
-    public static function createAnnotationMappingDriver(array $namespaces, array $directories, array $managerParameters, $enabledParameter = false, array $aliasMap = array())
+    public static function createAnnotationMappingDriver(array $mappings, array $directories, array $managerParameters, $enabledParameter = false, array $aliasMap = array())
     {
-        $arguments = array(new Reference('doctrine_couchdb.odm.metadata.annotation_reader'), $directories);
-        $locator = new Definition('Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator', $arguments);
-        $driver = new Definition('Doctrine\ODM\CouchDB\Mapping\Driver\AnnotationDriver', array($locator));
+        $reader = new Reference('annotation_reader');
+        $driver = new Definition(AnnotationDriver::class, [$reader, $directories]);
 
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        return new DoctrineCouchDBMappingsPass($driver, $mappings, $managerParameters, $enabledParameter, $aliasMap);
     }
 
     /**
-     * @param array    $namespaces          Hashmap of directory path to namespace
+     * @param array $mappings Hashmap of directory path to namespace
      * @param string[] $managerParameters List of parameters that could which object manager name
      *                                    your bundle uses. This compiler pass will automatically
      *                                    append the parameter name for the default entity manager
      *                                    to this list.
-     * @param string   $enabledParameter  Service container parameter that must be present to
+     * @param string|boolean $enabledParameter Service container parameter that must be present to
      *                                    enable the mapping. Set to false to not do any check,
      *                                    optional..
-     * @param string[] $aliasMap          Map of alias to namespace.
+     * @param string[] $aliasMap Map of alias to namespace.
+     * @return DoctrineCouchDBMappingsPass
      */
-    public static function createPhpMappingDriver(array $namespaces, array $managerParameters = array(), $enabledParameter = false, array $aliasMap = array())
+    public static function createPhpMappingDriver(array $mappings, array $managerParameters = array(), $enabledParameter = false, array $aliasMap = array())
     {
-        $arguments = array($namespaces, '.php');
-        $locator = new Definition('Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator', $arguments);
-        $driver = new Definition('Doctrine\Common\Persistence\Mapping\Driver\PHPDriver', array($locator));
+        $arguments = array($mappings, '.php');
+        $locator = new Definition(SymfonyFileLocator::class, $arguments);
+        $driver = new Definition(PHPDriver::class, [$locator]);
 
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        return new DoctrineCouchDBMappingsPass($driver, $mappings, $managerParameters, $enabledParameter, $aliasMap);
     }
 
     /**
-     * @param array    $namespaces        List of namespaces that are handled with static php mapping
-     * @param array    $directories       List of directories to look for static php mapping files
+     * @param array $mappings List of namespaces that are handled with static php mapping
+     * @param array $directories List of directories to look for static php mapping files
      * @param string[] $managerParameters List of parameters that could which object manager name
      *                                    your bundle uses. This compiler pass will automatically
      *                                    append the parameter name for the default entity manager
      *                                    to this list.
-     * @param string   $enabledParameter  Service container parameter that must be present to
+     * @param string|boolean $enabledParameter Service container parameter that must be present to
      *                                    enable the mapping. Set to false to not do any check,
      *                                    optional..
-     * @param string[] $aliasMap          Map of alias to namespace.
+     * @param string[] $aliasMap Map of alias to namespace.
+     * @return DoctrineCouchDBMappingsPass
      */
-    public static function createStaticPhpMappingDriver(array $namespaces, array $directories, array $managerParameters = array(), $enabledParameter = false, array $aliasMap = array())
+    public static function createStaticPhpMappingDriver(array $mappings, array $directories, array $managerParameters = array(), $enabledParameter = false, array $aliasMap = array())
     {
-        $driver = new Definition('Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver', array($directories));
-
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        $driver = new Definition(StaticPHPDriver::class, [$directories]);
+        return new DoctrineCouchDBMappingsPass($driver, $mappings, $managerParameters, $enabledParameter, $aliasMap);
     }
 }
